@@ -1,19 +1,44 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { clearToken } from '@/lib/auth-store';
+import { getMe } from '@/lib/users-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
 
-const MOCK_BALANCE = 42.5;
-
 export default function ProfileScreen() {
   const router = useRouter();
+  const [balance, setBalance] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
   const [withdrawRequested, setWithdrawRequested] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+
+  const loadProfile = useCallback(async () => {
+    try {
+      const user = await getMe();
+      setBalance(user.balance);
+    } catch {
+      setBalance(0);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+    }, [loadProfile])
+  );
+
+  const handleSignOut = () => {
+    clearToken();
+    router.replace('/login');
+  };
 
   return (
     <FuturisticScreen title="Profile">
@@ -31,7 +56,9 @@ export default function ProfileScreen() {
           />
           <View style={styles.balanceText}>
             <Text style={styles.balanceLabel}>Available balance</Text>
-            <Text style={styles.balanceValue}>${MOCK_BALANCE.toFixed(2)}</Text>
+            <Text style={styles.balanceValue}>
+              {loading ? '—' : `$${(balance ?? 0).toFixed(2)}`}
+            </Text>
           </View>
         </GlassCard>
       </Animated.View>
@@ -54,7 +81,7 @@ export default function ProfileScreen() {
           </Pressable>
           <View style={styles.optionDivider} />
           <Pressable
-            onPress={() => setWithdrawRequested(true)}
+            onPress={() => router.push('/withdraw' as import('expo-router').Href)}
             style={({ pressed }) => [styles.optionRow, pressed && styles.optionRowPressed]}
           >
             <SymbolView
@@ -110,7 +137,7 @@ export default function ProfileScreen() {
 
       <Animated.View entering={FadeInDown.delay(480).springify().damping(18)} style={styles.signOutSection}>
         <Pressable
-          onPress={() => router.replace('/login')}
+          onPress={handleSignOut}
           style={({ pressed }) => [styles.signOutButton, pressed && styles.optionRowPressed]}
         >
           <Text style={styles.signOutText}>Sign out</Text>
@@ -224,5 +251,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: FuturisticTheme.textMuted,
+  },
+  toastError: {
+    borderColor: '#FF5252',
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#FF5252',
+    marginBottom: 10,
   },
 });

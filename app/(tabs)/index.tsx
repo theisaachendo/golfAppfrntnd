@@ -1,7 +1,7 @@
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -14,19 +14,27 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { getActiveGame } from '@/lib/users-api';
 
 import { GradientActionCard } from '@/components/GradientActionCard';
 import { GradientBackground } from '@/components/GradientBackground';
 import { GlassCard } from '@/components/GlassCard';
 import { NavBar } from '@/components/NavBar';
 
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
-
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const heroOpacity = useSharedValue(0);
   const heroTranslate = useSharedValue(20);
+  const [activeGameId, setActiveGameId] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      getActiveGame()
+        .then(({ game }) => setActiveGameId(game?.id ?? null))
+        .catch(() => setActiveGameId(null));
+    }, [])
+  );
 
   useEffect(() => {
     heroOpacity.value = withDelay(100, withSpring(1, { damping: 20 }));
@@ -37,6 +45,8 @@ export default function HomeScreen() {
     opacity: heroOpacity.value,
     transform: [{ translateY: heroTranslate.value }],
   }));
+
+  const hasActiveMatch = activeGameId != null;
 
   return (
     <Animated.View style={styles.container}>
@@ -57,7 +67,9 @@ export default function HomeScreen() {
             Modern skins.{'\n'}Real stakes.
           </Text>
           <Text style={styles.heroSubtitle}>
-            Create or join a game in seconds. Track every hole, every skin.
+            {hasActiveMatch
+              ? 'You have a game in progress. Resume to continue.'
+              : 'Create or join a game in seconds. Track every hole, every skin.'}
           </Text>
         </Animated.View>
 
@@ -74,35 +86,54 @@ export default function HomeScreen() {
           </GlassCard>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
-          <GradientActionCard
-            title="New game"
-            subtitle="Set stakes, invite players, start scoring."
-            icon={
-              <SymbolView
-                name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }}
-                size={36}
-                tintColor={FuturisticTheme.accent}
+        {hasActiveMatch ? (
+          <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
+            <GradientActionCard
+              title="Resume match"
+              subtitle="Continue your game in progress."
+              icon={
+                <SymbolView
+                  name={{ ios: 'play.circle.fill', android: 'play_circle_filled', web: 'play_circle_filled' }}
+                  size={36}
+                  tintColor={FuturisticTheme.accent}
+                />
+              }
+              onPress={() => router.push(`/match/${activeGameId}`)}
+            />
+          </Animated.View>
+        ) : (
+          <>
+            <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
+              <GradientActionCard
+                title="New game"
+                subtitle="Set stakes, invite players, start scoring."
+                icon={
+                  <SymbolView
+                    name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }}
+                    size={36}
+                    tintColor={FuturisticTheme.accent}
+                  />
+                }
+                onPress={() => router.push('/create')}
               />
-            }
-            onPress={() => router.push('/create')}
-          />
-        </Animated.View>
+            </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(420).springify().damping(18)}>
-          <GradientActionCard
-            title="Join game"
-            subtitle="Enter a code and get in the game."
-            icon={
-              <SymbolView
-                name={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
-                size={36}
-                tintColor={FuturisticTheme.accentTeal}
+            <Animated.View entering={FadeInDown.delay(420).springify().damping(18)}>
+              <GradientActionCard
+                title="Join game"
+                subtitle="Enter a code and get in the game."
+                icon={
+                  <SymbolView
+                    name={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
+                    size={36}
+                    tintColor={FuturisticTheme.accentTeal}
+                  />
+                }
+                onPress={() => router.push('/join')}
               />
-            }
-            onPress={() => router.push('/join')}
-          />
-        </Animated.View>
+            </Animated.View>
+          </>
+        )}
 
         <Animated.View entering={FadeIn.delay(520)} style={styles.howSection}>
           <Text style={styles.sectionTitle}>How it works</Text>

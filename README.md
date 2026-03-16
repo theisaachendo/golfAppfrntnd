@@ -29,6 +29,33 @@ npm run web
 
 ---
 
+## Testing with the backend
+
+The app is wired to the Golf Skins API. To test against your backend:
+
+1. **Set the API URL**
+   - Copy `.env.example` to `.env`: `cp .env.example .env`
+   - Edit `.env` and set `EXPO_PUBLIC_API_URL`:
+     - Local backend: `http://localhost:3000`
+     - Physical device (backend on your machine): use your machine’s LAN IP, e.g. `http://192.168.1.10:3000`
+     - Production: `https://golf-app-api-gv91.onrender.com`
+
+2. **Restart the dev server** after changing `.env` (Expo reads env at start).
+
+3. **Demo login** (if your backend seeds a demo user):
+   - Email: `demo@example.com`
+   - Password: `password`
+
+4. **Flows to test**
+   - **Login** → Sign in or “Continue as guest”.
+   - **Create game** → Name + stake → Lobby shows game code; share code to join from another device/session.
+   - **Join game** → Enter code → Lobby.
+   - **Lobby** → Start game → Match screen: tap holes to set skin winner, then “End game & see results”.
+   - **Profile** → Balance from API; “Request withdrawal” → Withdraw screen; Match history from API.
+   - **Sign out** → Clears token and returns to login.
+
+---
+
 ## App structure & navigation
 
 ### Routes (expo-router)
@@ -45,6 +72,7 @@ npm run web
 | `/match/[id]` | `app/match/[id].tsx` | Active match: leaderboard, holes, end game |
 | `/result/[id]` | `app/result/[id].tsx` | Post-match: winner, standings, payouts |
 | `/match-history` | `app/match-history.tsx` | List of past matches (from Profile) |
+| `/withdraw` | `app/withdraw.tsx` | Request withdrawal (amount) |
 
 ### Query / dynamic params
 

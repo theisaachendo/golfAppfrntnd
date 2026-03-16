@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,6 +14,8 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { ApiError } from '@/lib/api';
+import { guest, login } from '@/lib/auth-api';
 
 import { GradientBackground } from '@/components/GradientBackground';
 import { GlassCard } from '@/components/GlassCard';
@@ -21,10 +24,33 @@ export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = () => {
-    // TODO: wire to real auth
-    router.replace('/(tabs)');
+  const handleLogin = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await login(email.trim(), password);
+      router.replace('/(tabs)');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Sign in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGuest = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await guest();
+      router.replace('/(tabs)');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Guest sign-in failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,18 +96,30 @@ export default function LoginScreen() {
             </GlassCard>
           </Animated.View>
 
+          {error ? (
+            <Animated.View entering={FadeInDown.delay(100)}>
+              <Text style={styles.errorText}>{error}</Text>
+            </Animated.View>
+          ) : null}
+
           <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
             <Pressable
               onPress={handleLogin}
-              style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+              disabled={loading}
+              style={({ pressed }) => [styles.button, pressed && styles.buttonPressed, loading && styles.buttonDisabled]}
             >
-              <Text style={styles.buttonText}>Sign in</Text>
+              {loading ? (
+                <ActivityIndicator color={FuturisticTheme.bgDeep} />
+              ) : (
+                <Text style={styles.buttonText}>Sign in</Text>
+              )}
             </Pressable>
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(400).springify().damping(18)}>
             <Pressable
-              onPress={() => router.replace('/(tabs)')}
+              onPress={handleGuest}
+              disabled={loading}
               style={({ pressed }) => [styles.guestWrap, pressed && styles.linkPressed]}
             >
               <Text style={styles.guestText}>Continue as guest</Text>
@@ -159,5 +197,13 @@ const styles = StyleSheet.create({
   },
   linkPressed: {
     opacity: 0.7,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#FF5252',
+    marginBottom: 12,
   },
 });

@@ -1,26 +1,67 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { ApiError } from '@/lib/api';
+import { getGameResults, type ResultRow } from '@/lib/games-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
 
-const MOCK_RESULTS = [
-  { name: 'You', skins: 5, payout: 25 },
-  { name: 'Alex', skins: 2, payout: -10 },
-  { name: 'Jordan', skins: 2, payout: -15 },
-];
-
 export default function PostMatchScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [results, setResults] = useState<ResultRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadResults = useCallback(async () => {
+    if (!id) return;
+    try {
+      const data = await getGameResults(id);
+      setResults(data);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Failed to load results');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadResults();
+  }, [loadResults]);
 
   const handleDone = () => {
     router.replace('/(tabs)');
   };
+
+  if (loading) {
+    return (
+      <FuturisticScreen title="Match results" showBack>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={FuturisticTheme.accent} />
+          <Text style={styles.loadingText}>Loading results…</Text>
+        </View>
+      </FuturisticScreen>
+    );
+  }
+
+  if (error && results.length === 0) {
+    return (
+      <FuturisticScreen title="Match results" showBack>
+        <Text style={styles.errorText}>{error}</Text>
+        <Pressable style={styles.primaryButton} onPress={handleDone}>
+          <Text style={styles.primaryButtonText}>Back to home</Text>
+        </Pressable>
+      </FuturisticScreen>
+    );
+  }
+
+  const winner = results.length > 0 ? results.reduce((a, b) => (a.payout >= b.payout ? a : b)) : null;
 
   return (
     <FuturisticScreen title="Match results" showBack>
@@ -29,35 +70,43 @@ export default function PostMatchScreen() {
         <Text style={styles.hint}>Skins and payouts below.</Text>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
-        <GlassCard style={styles.winnerCard}>
-          <SymbolView
-            name={{ ios: 'trophy.fill', android: 'emoji_events', web: 'emoji_events' }}
-            size={40}
-            tintColor={FuturisticTheme.accent}
-          />
-          <Text style={styles.winnerLabel}>Winner</Text>
-          <Text style={styles.winnerName}>You</Text>
-          <Text style={styles.winnerPayout}>+$25</Text>
-        </GlassCard>
-      </Animated.View>
+      {winner && (
+        <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+          <GlassCard style={styles.winnerCard}>
+            <SymbolView
+              name={{ ios: 'trophy.fill', android: 'emoji_events', web: 'emoji_events' }}
+              size={40}
+              tintColor={FuturisticTheme.accent}
+            />
+            <Text style={styles.winnerLabel}>Winner</Text>
+            <Text style={styles.winnerName}>{winner.name}</Text>
+            <Text style={styles.winnerPayout}>
+              {winner.payout >= 0 ? '+' : ''}${winner.payout}
+            </Text>
+          </GlassCard>
+        </Animated.View>
+      )}
 
       <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
         <Text style={styles.sectionTitle}>Final standings</Text>
-        {MOCK_RESULTS.map((row, i) => (
-          <Animated.View key={row.name} entering={FadeIn.delay(320 + i * 80)}>
-            <GlassCard style={styles.resultRow}>
-              <View style={styles.resultLeft}>
-                <Text style={styles.resultPos}>{i + 1}</Text>
-                <Text style={styles.resultName}>{row.name}</Text>
-              </View>
-              <Text style={styles.resultSkins}>{row.skins} skins</Text>
-              <Text style={[styles.resultPayout, row.payout >= 0 ? styles.payoutWin : styles.payoutLoss]}>
-                {row.payout >= 0 ? '+' : ''}${row.payout}
-              </Text>
-            </GlassCard>
-          </Animated.View>
-        ))}
+        {results.length === 0 ? (
+          <Text style={styles.emptyText}>No results.</Text>
+        ) : (
+          results.map((row, i) => (
+            <Animated.View key={row.playerId} entering={FadeIn.delay(320 + i * 80)}>
+              <GlassCard style={styles.resultRow}>
+                <View style={styles.resultLeft}>
+                  <Text style={styles.resultPos}>{i + 1}</Text>
+                  <Text style={styles.resultName}>{row.name}</Text>
+                </View>
+                <Text style={styles.resultSkins}>{row.skinsWon} skins</Text>
+                <Text style={[styles.resultPayout, row.payout >= 0 ? styles.payoutWin : styles.payoutLoss]}>
+                  {row.payout >= 0 ? '+' : ''}${row.payout}
+                </Text>
+              </GlassCard>
+            </Animated.View>
+          ))
+        )}
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(560).springify().damping(18)} style={styles.actions}>
@@ -167,5 +216,24 @@ const styles = StyleSheet.create({
   },
   primaryButtonPressed: {
     opacity: 0.9,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: FuturisticTheme.textSecondary,
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#FF5252',
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: FuturisticTheme.textMuted,
   },
 });

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,6 +13,8 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { ApiError } from '@/lib/api';
+import { createGame } from '@/lib/games-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
@@ -20,10 +23,38 @@ export default function CreateScreen() {
   const router = useRouter();
   const [gameName, setGameName] = useState('');
   const [stakePerHole, setStakePerHole] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = () => {
-    // TODO: create game via API
-    router.replace('/lobby?gameId=new');
+  const handleCreate = async () => {
+    const stake = parseFloat(stakePerHole.replace(/[^0-9.]/g, ''));
+    if (!gameName.trim()) {
+      setError('Enter a game name');
+      return;
+    }
+    if (Number.isNaN(stake) || stake <= 0) {
+      setError('Enter a valid stake per hole');
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const game = await createGame({ name: gameName.trim(), stakePerHole: stake });
+      router.replace(`/lobby?gameId=${game.id}`);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        router.replace('/login');
+        return;
+      }
+      const message =
+        e instanceof ApiError
+          ? `${e.message}${e.status ? ` (${e.status})` : ''}`
+          : 'Failed to create game';
+      setError(message);
+      if (__DEV__ && e instanceof Error) console.error('[Create game]', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,12 +95,27 @@ export default function CreateScreen() {
           </GlassCard>
         </Animated.View>
 
+        {error ? (
+          <Animated.View entering={FadeInDown.delay(100)}>
+            <Text style={styles.errorText}>{error}</Text>
+          </Animated.View>
+        ) : null}
+
         <Animated.View entering={FadeInDown.delay(340).springify().damping(18)}>
           <Pressable
             onPress={handleCreate}
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
+            disabled={loading}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              pressed && styles.primaryButtonPressed,
+              loading && styles.primaryButtonDisabled,
+            ]}
           >
-            <Text style={styles.primaryButtonText}>Create & go to lobby</Text>
+            {loading ? (
+              <ActivityIndicator color={FuturisticTheme.bgDeep} />
+            ) : (
+              <Text style={styles.primaryButtonText}>Create & go to lobby</Text>
+            )}
           </Pressable>
         </Animated.View>
       </KeyboardAvoidingView>
@@ -122,5 +168,13 @@ const styles = StyleSheet.create({
   },
   primaryButtonPressed: {
     opacity: 0.9,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.7,
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#FF5252',
+    marginBottom: 12,
   },
 });

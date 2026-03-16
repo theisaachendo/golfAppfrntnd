@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,52 +13,56 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
 import { ApiError } from '@/lib/api';
-import { joinGame } from '@/lib/games-api';
+import { withdraw as withdrawApi } from '@/lib/users-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
 
-export default function JoinScreen() {
+export default function WithdrawScreen() {
   const router = useRouter();
-  const [code, setCode] = useState('');
+  const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleJoin = async () => {
-    if (!code.trim()) return;
+  const handleWithdraw = async () => {
+    const num = parseFloat(amount.replace(/[^0-9.]/g, ''));
+    if (Number.isNaN(num) || num <= 0) {
+      setError('Enter a valid amount');
+      return;
+    }
     setError(null);
     setLoading(true);
     try {
-      const res = await joinGame({ code: code.trim() });
-      router.replace(`/lobby?gameId=${res.gameId}`);
+      await withdrawApi(num);
+      router.back();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Failed to join game');
+      setError(e instanceof ApiError ? e.message : 'Withdrawal failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <FuturisticScreen title="Join game" showBack>
+    <FuturisticScreen title="Withdraw" showBack>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboard}
       >
         <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
-          <Text style={styles.label}>GAME CODE</Text>
-          <Text style={styles.hint}>Enter the code from your host to join.</Text>
+          <Text style={styles.label}>AMOUNT</Text>
+          <Text style={styles.hint}>Enter the amount to withdraw.</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
           <GlassCard style={styles.card}>
+            <Text style={styles.fieldLabel}>Amount ($)</Text>
             <TextInput
               style={styles.input}
-              placeholder="e.g. ABC-1234"
+              placeholder="e.g. 25"
               placeholderTextColor={FuturisticTheme.textMuted}
-              value={code}
-              onChangeText={setCode}
-              autoCapitalize="characters"
-              autoCorrect={false}
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
             />
           </GlassCard>
         </Animated.View>
@@ -71,23 +74,19 @@ export default function JoinScreen() {
         ) : null}
 
         <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
-          <View style={styles.actions}>
-            <Pressable
-              onPress={handleJoin}
-              disabled={!code.trim() || loading}
-              style={({ pressed }) => [
-                styles.primaryButton,
-                (!code.trim() || loading) && styles.primaryButtonDisabled,
-                pressed && styles.primaryButtonPressed,
-              ]}
-            >
-              {loading ? (
-                <ActivityIndicator color={FuturisticTheme.bgDeep} />
-              ) : (
-                <Text style={styles.primaryButtonText}>Join game</Text>
-              )}
-            </Pressable>
-          </View>
+          <Pressable
+            onPress={handleWithdraw}
+            disabled={loading}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              pressed && styles.primaryButtonPressed,
+              loading && styles.primaryButtonDisabled,
+            ]}
+          >
+            <Text style={styles.primaryButtonText}>
+              {loading ? 'Requesting…' : 'Request withdrawal'}
+            </Text>
+          </Pressable>
         </Animated.View>
       </KeyboardAvoidingView>
     </FuturisticScreen>
@@ -111,38 +110,41 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: FuturisticTheme.textMuted,
+    marginBottom: 8,
   },
   input: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '500',
     color: FuturisticTheme.textPrimary,
     paddingVertical: 4,
   },
-  actions: {
-    marginTop: 8,
+  errorText: {
+    fontSize: 15,
+    color: '#FF5252',
+    marginBottom: 12,
   },
   primaryButton: {
     backgroundColor: FuturisticTheme.accent,
     paddingVertical: 16,
     borderRadius: 14,
-    overflow: 'hidden',
     alignItems: 'center',
+    marginTop: 8,
   },
   primaryButtonText: {
     fontSize: 17,
     fontWeight: '700',
     color: FuturisticTheme.bgDeep,
   },
-  primaryButtonDisabled: {
-    opacity: 0.5,
-  },
   primaryButtonPressed: {
     opacity: 0.9,
   },
-  errorText: {
-    fontSize: 15,
-    color: '#FF5252',
-    marginBottom: 12,
+  primaryButtonDisabled: {
+    opacity: 0.6,
   },
 });

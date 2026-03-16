@@ -1,22 +1,91 @@
+import * as Clipboard from 'expo-clipboard';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { ApiError } from '@/lib/api';
+import { getGame, startGame, type Game } from '@/lib/games-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
 
-const MOCK_PLAYERS = ['You', 'Alex', 'Jordan'];
-
 export default function LobbyScreen() {
   const router = useRouter();
   const { gameId } = useLocalSearchParams<{ gameId?: string }>();
+  const [game, setGame] = useState<Game | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const handleStartGame = () => {
-    router.replace(`/match/${gameId || '1'}`);
+  const handleCopyCode = useCallback(async () => {
+    const code = game?.code ?? '';
+    if (!code) return;
+    await Clipboard.setStringAsync(code);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [game?.code]);
+
+  const loadGame = useCallback(async () => {
+    if (!gameId) {
+      setError('No game ID');
+      setLoading(false);
+      return;
+    }
+    try {
+      const g = await getGame(gameId);
+      setGame(g);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Failed to load game');
+    } finally {
+      setLoading(false);
+    }
+  }, [gameId]);
+
+  useEffect(() => {
+    loadGame();
+  }, [loadGame]);
+
+  const handleStartGame = async () => {
+    if (!gameId || !game) return;
+    setStarting(true);
+    try {
+      await startGame(gameId);
+      router.replace(`/match/${gameId}`);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Failed to start game');
+    } finally {
+      setStarting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <FuturisticScreen title="Lobby" showBack>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={FuturisticTheme.accent} />
+          <Text style={styles.loadingText}>Loading lobby…</Text>
+        </View>
+      </FuturisticScreen>
+    );
+  }
+
+  if (error && !game) {
+    return (
+      <FuturisticScreen title="Lobby" showBack>
+        <Text style={styles.errorText}>{error}</Text>
+      </FuturisticScreen>
+    );
+  }
+
+  const players = game?.players ?? [];
+  const canStart = players.length >= 1;
 
   return (
     <FuturisticScreen title="Lobby" showBack>
@@ -28,32 +97,74 @@ export default function LobbyScreen() {
       <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
         <GlassCard style={styles.codeCard}>
           <Text style={styles.codeLabel}>Game code</Text>
-          <Text style={styles.codeValue}>{gameId === 'new' ? 'ABC-1234' : gameId || '—'}</Text>
+          <View style={styles.codeRow}>
+            <Text style={styles.codeValue}>{game?.code ?? '—'}</Text>
+            <Pressable
+              onPress={handleCopyCode}
+              disabled={!game?.code}
+              style={({ pressed }) => [
+                styles.copyButton,
+                pressed && styles.copyButtonPressed,
+                copied && styles.copyButtonCopied,
+              ]}
+              accessibilityLabel="Copy game code"
+            >
+              <View style={styles.copyButtonContent}>
+                <SymbolView
+                  name={{
+                    ios: 'doc.on.clipboard',
+                    android: 'content_copy',
+                    web: 'content_copy',
+                  }}
+                  size={24}
+                  tintColor={copied ? FuturisticTheme.accent : FuturisticTheme.textMuted}
+                />
+                {copied ? (
+                  <Text style={styles.copiedText}>Copied!</Text>
+                ) : null}
+              </View>
+            </Pressable>
+          </View>
         </GlassCard>
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
-        <Text style={styles.sectionTitle}>Players ({MOCK_PLAYERS.length})</Text>
-        {MOCK_PLAYERS.map((name, i) => (
-          <Animated.View key={name} entering={FadeIn.delay(320 + i * 60)}>
-            <GlassCard style={styles.playerCard}>
-              <SymbolView
-                name={{ ios: 'person.circle.fill', android: 'person', web: 'person' }}
-                size={28}
-                tintColor={FuturisticTheme.accent}
-              />
-              <Text style={styles.playerName}>{name}</Text>
-            </GlassCard>
-          </Animated.View>
-        ))}
+        <Text style={styles.sectionTitle}>Players ({players.length})</Text>
+        {players.length === 0 ? (
+          <Text style={styles.emptyText}>No players yet.</Text>
+        ) : (
+          players.map((p, i) => (
+            <Animated.View key={p.id ?? p.displayName} entering={FadeIn.delay(320 + i * 60)}>
+              <GlassCard style={styles.playerCard}>
+                <SymbolView
+                  name={{ ios: 'person.circle.fill', android: 'person', web: 'person' }}
+                  size={28}
+                  tintColor={FuturisticTheme.accent}
+                />
+                <Text style={styles.playerName}>{p.displayName}</Text>
+              </GlassCard>
+            </Animated.View>
+          ))
+        )}
       </Animated.View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <Animated.View entering={FadeInDown.delay(520).springify().damping(18)} style={styles.actions}>
         <Pressable
           onPress={handleStartGame}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
+          disabled={!canStart || starting}
+          style={({ pressed }) => [
+            styles.primaryButton,
+            pressed && styles.primaryButtonPressed,
+            (!canStart || starting) && styles.primaryButtonDisabled,
+          ]}
         >
-          <Text style={styles.primaryButtonText}>Start game</Text>
+          {starting ? (
+            <ActivityIndicator color={FuturisticTheme.bgDeep} />
+          ) : (
+            <Text style={styles.primaryButtonText}>Start game</Text>
+          )}
         </Pressable>
       </Animated.View>
     </FuturisticScreen>
@@ -83,11 +194,36 @@ const styles = StyleSheet.create({
     color: FuturisticTheme.textMuted,
     marginBottom: 4,
   },
+  codeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   codeValue: {
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: 4,
     color: FuturisticTheme.textPrimary,
+  },
+  copyButton: {
+    padding: 8,
+    borderRadius: 10,
+  },
+  copyButtonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  copyButtonPressed: {
+    opacity: 0.8,
+  },
+  copyButtonCopied: {
+    opacity: 1,
+  },
+  copiedText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: FuturisticTheme.accent,
+    marginTop: 2,
   },
   sectionTitle: {
     fontSize: 15,
@@ -122,5 +258,27 @@ const styles = StyleSheet.create({
   },
   primaryButtonPressed: {
     opacity: 0.9,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.5,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: FuturisticTheme.textSecondary,
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#FF5252',
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: FuturisticTheme.textMuted,
   },
 });
