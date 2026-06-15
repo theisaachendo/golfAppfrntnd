@@ -2,20 +2,22 @@ import React from 'react';
 import { SymbolView } from 'expo-symbols';
 import { Tabs } from 'expo-router';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { FuturisticTheme } from '@/constants/Colors';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        // Each screen renders its own NavBar, so hide the default header.
+        headerShown: false,
+        tabBarActiveTintColor: FuturisticTheme.accent,
+        tabBarInactiveTintColor: FuturisticTheme.textMuted,
+        tabBarStyle: {
+          backgroundColor: FuturisticTheme.bgMid,
+          borderTopColor: FuturisticTheme.divider,
+          borderTopWidth: 1,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}>
       <Tabs.Screen
         name="index"

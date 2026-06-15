@@ -29,32 +29,63 @@ export const DesignTokens = {
   minTouchTarget: 44,
 } as const;
 
-// Modern futuristic golf theme (dark-first, premium HUD feel)
+// Premium dark theme — sportsbook / fintech feel (DraftKings / Robinhood / Whoop).
+// Charcoal surfaces, one confident accent, crisp type, real depth.
 export const FuturisticTheme = {
-  // Backgrounds
-  bgDeep: '#0A0E14',
-  bgMid: '#0F1419',
-  bgCard: 'rgba(255, 255, 255, 0.06)',
-  bgCardHover: 'rgba(255, 255, 255, 0.09)',
-  // Accents (electric green / teal)
-  accent: '#00E676',
-  accentDim: 'rgba(0, 230, 118, 0.4)',
-  accentTeal: '#00BFA5',
-  accentBlue: '#00B8D4',
+  // Backgrounds (near-black charcoal, layered)
+  bgDeep: '#0A0C10',
+  bgMid: '#0E1116',
+  bgCard: '#161A21', // solid elevated surface (was translucent glass)
+  bgCardHover: '#1C212A',
+  surface: '#161A21',
+  surfaceElevated: '#1C212A',
+  // Accent — single confident electric green (refined, not neon)
+  accent: '#1ED77B',
+  accentPressed: '#17B768',
+  accentSoft: 'rgba(30, 215, 123, 0.14)',
+  accentDim: 'rgba(30, 215, 123, 0.14)',
+  // Secondary highlight (used sparingly)
+  accentTeal: '#2DD4BF',
+  accentBlue: '#5B9DFF',
+  // Status
+  danger: '#FF5C5C',
   // Gradients (for LinearGradient colors array)
-  gradientStart: '#0D5C2E',
-  gradientMid: '#00E676',
-  gradientEnd: '#00BFA5',
-  gradientHero: ['#0A0E14', '#0D1F17', '#0A0E14'] as const,
-  gradientCta: ['#00E676', '#00BFA5'] as const,
-  // Glass
-  glassBorder: 'rgba(255, 255, 255, 0.12)',
-  glassHighlight: 'rgba(255, 255, 255, 0.04)',
+  gradientStart: '#1ED77B',
+  gradientMid: '#16B866',
+  gradientEnd: '#0E9E5A',
+  gradientHero: ['#0A0C10', '#0C1410', '#0A0C10'] as const,
+  gradientCta: ['#1ED77B', '#16B866'] as const,
+  // Borders / dividers
+  glassBorder: 'rgba(255, 255, 255, 0.07)',
+  glassHighlight: 'rgba(255, 255, 255, 0.03)',
+  border: 'rgba(255, 255, 255, 0.07)',
+  borderStrong: 'rgba(255, 255, 255, 0.12)',
+  divider: 'rgba(255, 255, 255, 0.06)',
   // Text
-  textPrimary: '#FFFFFF',
-  textSecondary: 'rgba(255, 255, 255, 0.7)',
-  textMuted: 'rgba(255, 255, 255, 0.5)',
+  textPrimary: '#F4F6F8',
+  textSecondary: '#98A2B3',
+  textMuted: '#5E6672',
 } as const;
+
+// Shared elevation + scales for a consistent premium look.
+export const Shadow = {
+  card: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  accent: {
+    shadowColor: '#1ED77B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+} as const;
+
+export const Radius = { sm: 12, md: 16, lg: 20, xl: 24, pill: 999 } as const;
 
 export default {
   light: {

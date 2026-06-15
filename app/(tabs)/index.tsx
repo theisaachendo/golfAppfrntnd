@@ -64,12 +64,12 @@ export default function HomeScreen() {
         <Animated.View style={[styles.hero, heroAnimatedStyle]}>
           <Text style={styles.heroLabel}>READY TO PLAY?</Text>
           <Text style={styles.heroTitle}>
-            Modern skins.{'\n'}Real stakes.
+            Skins,{'\n'}made simple.
           </Text>
           <Text style={styles.heroSubtitle}>
             {hasActiveMatch
               ? 'You have a game in progress. Resume to continue.'
-              : 'Create or join a game in seconds. Track every hole, every skin.'}
+              : 'Create or join a game in seconds. Track every hole and settle up after.'}
           </Text>
         </Animated.View>
 
@@ -81,7 +81,7 @@ export default function HomeScreen() {
                 size={22}
                 tintColor={FuturisticTheme.accent}
               />
-              <Text style={styles.stripText}>Skins format — win holes, win cash</Text>
+              <Text style={styles.stripText}>Skins format — most holes won takes it</Text>
             </Animated.View>
           </GlassCard>
         </Animated.View>
@@ -89,13 +89,14 @@ export default function HomeScreen() {
         {hasActiveMatch ? (
           <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
             <GradientActionCard
+              primary
               title="Resume match"
               subtitle="Continue your game in progress."
               icon={
                 <SymbolView
-                  name={{ ios: 'play.circle.fill', android: 'play_circle_filled', web: 'play_circle_filled' }}
-                  size={36}
-                  tintColor={FuturisticTheme.accent}
+                  name={{ ios: 'play.fill', android: 'play_arrow', web: 'play_arrow' }}
+                  size={24}
+                  tintColor="#0A0C10"
                 />
               }
               onPress={() => router.push(`/match/${activeGameId}`)}
@@ -105,13 +106,14 @@ export default function HomeScreen() {
           <>
             <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
               <GradientActionCard
+                primary
                 title="New game"
                 subtitle="Set stakes, invite players, start scoring."
                 icon={
                   <SymbolView
-                    name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }}
-                    size={36}
-                    tintColor={FuturisticTheme.accent}
+                    name={{ ios: 'plus', android: 'add', web: 'add' }}
+                    size={24}
+                    tintColor="#0A0C10"
                   />
                 }
                 onPress={() => router.push('/create')}
@@ -125,8 +127,8 @@ export default function HomeScreen() {
                 icon={
                   <SymbolView
                     name={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
-                    size={36}
-                    tintColor={FuturisticTheme.accentTeal}
+                    size={24}
+                    tintColor={FuturisticTheme.accent}
                   />
                 }
                 onPress={() => router.push('/join')}
@@ -171,21 +173,22 @@ const styles = StyleSheet.create({
   },
   hero: {
     marginBottom: 28,
+    marginTop: 8,
   },
   heroLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     letterSpacing: 2.4,
     color: FuturisticTheme.accent,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: '800',
-    lineHeight: 38,
+    lineHeight: 44,
     color: FuturisticTheme.textPrimary,
-    letterSpacing: -0.5,
-    marginBottom: 10,
+    letterSpacing: -1,
+    marginBottom: 12,
   },
   heroSubtitle: {
     fontSize: 16,

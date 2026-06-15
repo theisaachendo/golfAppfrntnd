@@ -1,53 +1,28 @@
-import { BlurView } from 'expo-blur';
 import { ReactNode } from 'react';
-import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 
-import { FuturisticTheme } from '@/constants/Colors';
+import { FuturisticTheme, Radius, Shadow } from '@/constants/Colors';
 
 type GlassCardProps = {
   children: ReactNode;
   style?: ViewStyle;
 };
 
+/**
+ * Premium elevated surface card — solid charcoal with a hairline border and
+ * a soft shadow for real depth (sportsbook/fintech look).
+ */
 export function GlassCard({ children, style }: GlassCardProps) {
-  if (Platform.OS === 'ios') {
-    return (
-      <View style={[styles.wrapper, style]}>
-        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-        <View style={styles.border}>
-          <View style={styles.inner}>{children}</View>
-        </View>
-      </View>
-    );
-  }
-
-  return (
-    <View style={[styles.wrapper, styles.androidGlass, style]}>
-      <View style={styles.border}>
-        <View style={styles.inner}>{children}</View>
-      </View>
-    </View>
-  );
+  return <View style={[styles.card, style]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    borderRadius: 20,
-    overflow: 'hidden',
+  card: {
+    backgroundColor: FuturisticTheme.surface,
+    borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: FuturisticTheme.glassBorder,
-  },
-  androidGlass: {
-    backgroundColor: FuturisticTheme.bgCard,
-  },
-  border: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: FuturisticTheme.glassBorder,
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
-  },
-  inner: {
-    padding: 20,
+    borderColor: FuturisticTheme.border,
+    padding: 18,
+    ...Shadow.card,
   },
 });
