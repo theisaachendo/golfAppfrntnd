@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { FuturisticTheme } from '@/constants/Colors';
 
 type GradientBackgroundProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 export function GradientBackground({ children }: GradientBackgroundProps) {
