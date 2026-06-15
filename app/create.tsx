@@ -23,6 +23,7 @@ export default function CreateScreen() {
   const router = useRouter();
   const [gameName, setGameName] = useState('');
   const [stakePerHole, setStakePerHole] = useState('');
+  const [numHoles, setNumHoles] = useState<9 | 18>(18);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +40,7 @@ export default function CreateScreen() {
     setError(null);
     setLoading(true);
     try {
-      const game = await createGame({ name: gameName.trim(), stakePerHole: stake });
+      const game = await createGame({ name: gameName.trim(), stakePerHole: stake, numHoles });
       router.replace(`/lobby?gameId=${game.id}`);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
@@ -92,6 +93,25 @@ export default function CreateScreen() {
               onChangeText={setStakePerHole}
               keyboardType="decimal-pad"
             />
+          </GlassCard>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(300).springify().damping(18)}>
+          <GlassCard style={styles.card}>
+            <Text style={styles.fieldLabel}>Holes</Text>
+            <View style={styles.segment}>
+              {([9, 18] as const).map((n) => (
+                <Pressable
+                  key={n}
+                  onPress={() => setNumHoles(n)}
+                  style={[styles.segmentItem, numHoles === n && styles.segmentItemActive]}
+                >
+                  <Text style={[styles.segmentText, numHoles === n && styles.segmentTextActive]}>
+                    {n} holes
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
           </GlassCard>
         </Animated.View>
 
@@ -153,6 +173,30 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: FuturisticTheme.textPrimary,
     paddingVertical: 4,
+  },
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: FuturisticTheme.bgDeep,
+    borderRadius: 12,
+    padding: 4,
+    gap: 4,
+  },
+  segmentItem: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 9,
+    alignItems: 'center',
+  },
+  segmentItemActive: {
+    backgroundColor: FuturisticTheme.accent,
+  },
+  segmentText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: FuturisticTheme.textSecondary,
+  },
+  segmentTextActive: {
+    color: FuturisticTheme.bgDeep,
   },
   primaryButton: {
     backgroundColor: FuturisticTheme.accent,
