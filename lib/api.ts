@@ -98,7 +98,10 @@ export async function apiRequest<T = unknown>(
           `Request failed (${res.status})`;
     const err = new ApiError(String(msg), res.status, data);
     if (__DEV__) {
-      console.error(`[API] ✗ ${init.method ?? 'GET'} ${url} ${res.status}\n${JSON.stringify(data, null, 2)}`);
+      // Expected client errors (e.g. 401 before login) log as warnings so they
+      // don't surface as a red error overlay; only 5xx server errors are errors.
+      const log = res.status >= 500 ? console.error : console.warn;
+      log(`[API] ✗ ${init.method ?? 'GET'} ${url} ${res.status}`);
     }
     throw err;
   }
