@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -26,6 +27,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [guestModal, setGuestModal] = useState(false);
+  const [guestName, setGuestName] = useState('');
 
   const handleLogin = async () => {
     setError(null);
@@ -40,11 +43,12 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGuest = async () => {
+  const submitGuest = async () => {
     setError(null);
     setLoading(true);
     try {
-      await guest();
+      await guest(guestName.trim() || undefined);
+      setGuestModal(false);
       router.replace('/(tabs)');
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Guest sign-in failed');
@@ -118,7 +122,10 @@ export default function LoginScreen() {
 
           <Animated.View entering={FadeInDown.delay(400).springify().damping(18)}>
             <Pressable
-              onPress={handleGuest}
+              onPress={() => {
+                setError(null);
+                setGuestModal(true);
+              }}
               disabled={loading}
               style={({ pressed }) => [styles.guestWrap, pressed && styles.linkPressed]}
             >
@@ -145,6 +152,45 @@ export default function LoginScreen() {
           </Animated.View>
         </Animated.View>
       </KeyboardAvoidingView>
+
+      <Modal visible={guestModal} transparent animationType="fade" onRequestClose={() => setGuestModal(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setGuestModal(false)}>
+          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.modalTitle}>What's your name?</Text>
+            <Text style={styles.modalSubtitle}>
+              This is how you'll show up in games. You can change it later in your profile.
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Your name"
+              placeholderTextColor={FuturisticTheme.textMuted}
+              value={guestName}
+              onChangeText={setGuestName}
+              autoCapitalize="words"
+              autoFocus
+              maxLength={40}
+              returnKeyType="go"
+              onSubmitEditing={submitGuest}
+            />
+            <Pressable
+              onPress={submitGuest}
+              disabled={loading || !guestName.trim()}
+              style={({ pressed }) => [
+                styles.button,
+                styles.modalButton,
+                pressed && styles.buttonPressed,
+                (loading || !guestName.trim()) && styles.buttonDisabled,
+              ]}
+            >
+              {loading ? (
+                <ActivityIndicator color={FuturisticTheme.bgDeep} />
+              ) : (
+                <Text style={styles.buttonText}>Start playing</Text>
+              )}
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -238,5 +284,47 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#FF5252',
     marginBottom: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: FuturisticTheme.surface,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: FuturisticTheme.border,
+    padding: 22,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: FuturisticTheme.textPrimary,
+    letterSpacing: -0.4,
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    lineHeight: 19,
+    color: FuturisticTheme.textSecondary,
+    marginBottom: 18,
+  },
+  modalInput: {
+    fontSize: 17,
+    color: FuturisticTheme.textPrimary,
+    backgroundColor: FuturisticTheme.bgDeep,
+    borderWidth: 1,
+    borderColor: FuturisticTheme.border,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  modalButton: {
+    marginTop: 16,
   },
 });

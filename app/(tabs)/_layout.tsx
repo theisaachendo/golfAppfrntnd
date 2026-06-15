@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { getToken } from '@/lib/auth-store';
 
 export default function TabLayout() {
+  const router = useRouter();
+  const [checked, setChecked] = useState(false);
+
+  // Auth guard: the main app requires a token (real user or guest).
+  useEffect(() => {
+    getToken().then((token) => {
+      if (!token) router.replace('/login');
+      else setChecked(true);
+    });
+  }, [router]);
+
+  if (!checked) return null;
+
   return (
     <Tabs
       screenOptions={{

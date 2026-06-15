@@ -12,6 +12,13 @@ export async function getMe(): Promise<User> {
   return apiRequest<User>('/api/users/me');
 }
 
+export async function updateDisplayName(displayName: string): Promise<User> {
+  return apiRequest<User>('/api/users/me', {
+    method: 'PATCH',
+    body: JSON.stringify({ displayName }),
+  });
+}
+
 export async function getBalance(): Promise<{ balance: number }> {
   return apiRequest<{ balance: number }>('/api/users/me/balance');
 }
