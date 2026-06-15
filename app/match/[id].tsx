@@ -69,19 +69,32 @@ export default function ActiveMatchScreen() {
             }
           : null
       );
+      setError(null);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Failed to record winner');
+      setError(e instanceof ApiError ? e.message : 'Failed to record winner. Tap the hole to try again.');
     }
   };
 
   const handleEndGame = async () => {
     if (!id) return;
     setEnding(true);
+    setError(null);
     try {
       await endGame(id);
       router.replace(`/result/${id}`);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Failed to end game');
+      // Safety net: if the game actually ended (e.g. lost response on retry),
+      // go to results instead of leaving the user stuck.
+      try {
+        const g = await getGame(id);
+        if (g.status === 'completed') {
+          router.replace(`/result/${id}`);
+          return;
+        }
+      } catch {
+        // ignore — fall through to error message
+      }
+      setError(e instanceof ApiError ? e.message : 'Failed to end game. Tap to try again.');
     } finally {
       setEnding(false);
     }
