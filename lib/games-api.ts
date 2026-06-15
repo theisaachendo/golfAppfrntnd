@@ -63,3 +63,31 @@ export type ResultRow = { playerId: string; name: string; skinsWon: number; payo
 export async function getGameResults(gameId: string): Promise<ResultRow[]> {
   return apiRequest<ResultRow[]>(`/api/games/${gameId}/results`);
 }
+
+// "Who owes whom" for a completed game (friends settle off-app).
+export type Settlement = {
+  id: string;
+  fromUserId: string;
+  fromName: string;
+  toUserId: string;
+  toName: string;
+  amount: number;
+  settled: boolean;
+  settledAt?: string | null;
+  involvesViewer: boolean;
+  viewerOwes: boolean;
+};
+
+export async function getGameSettlements(gameId: string): Promise<Settlement[]> {
+  return apiRequest<Settlement[]>(`/api/games/${gameId}/settlements`);
+}
+
+export async function markSettlementSettled(
+  settlementId: string,
+  settled = true
+): Promise<{ id: string; settled: boolean; settledAt?: string | null }> {
+  return apiRequest(`/api/users/me/settlements/${settlementId}/settle`, {
+    method: 'POST',
+    body: JSON.stringify({ settled }),
+  });
+}

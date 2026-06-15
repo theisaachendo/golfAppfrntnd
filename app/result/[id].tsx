@@ -6,7 +6,13 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
 import { ApiError } from '@/lib/api';
-import { getGameResults, type ResultRow } from '@/lib/games-api';
+import {
+  getGameResults,
+  getGameSettlements,
+  markSettlementSettled,
+  type ResultRow,
+  type Settlement,
+} from '@/lib/games-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
@@ -15,14 +21,16 @@ export default function PostMatchScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [results, setResults] = useState<ResultRow[]>([]);
+  const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadResults = useCallback(async () => {
     if (!id) return;
     try {
-      const data = await getGameResults(id);
+      const [data, settle] = await Promise.all([getGameResults(id), getGameSettlements(id)]);
       setResults(data);
+      setSettlements(settle);
       setError(null);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Failed to load results');
@@ -30,6 +38,20 @@ export default function PostMatchScreen() {
       setLoading(false);
     }
   }, [id]);
+
+  const toggleSettled = useCallback(async (s: Settlement) => {
+    // optimistic
+    setSettlements((prev) =>
+      prev.map((x) => (x.id === s.id ? { ...x, settled: !x.settled } : x))
+    );
+    try {
+      await markSettlementSettled(s.id, !s.settled);
+    } catch {
+      setSettlements((prev) =>
+        prev.map((x) => (x.id === s.id ? { ...x, settled: s.settled } : x))
+      );
+    }
+  }, []);
 
   useEffect(() => {
     loadResults();
@@ -67,7 +89,7 @@ export default function PostMatchScreen() {
     <FuturisticScreen title="Match results" showBack>
       <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
         <Text style={styles.label}>GAME COMPLETE</Text>
-        <Text style={styles.hint}>Skins and payouts below.</Text>
+        <Text style={styles.hint}>Skins, standings, and who owes whom below.</Text>
       </Animated.View>
 
       {winner && (
@@ -108,6 +130,40 @@ export default function PostMatchScreen() {
           ))
         )}
       </Animated.View>
+
+      {settlements.length > 0 && (
+        <Animated.View entering={FadeInDown.delay(420).springify().damping(18)}>
+          <Text style={styles.sectionTitle}>Settle up</Text>
+          <Text style={styles.settleHint}>
+            Pay each other directly (Venmo, cash, etc.), then tap to mark it done.
+          </Text>
+          {settlements.map((s, i) => (
+            <Animated.View key={s.id} entering={FadeIn.delay(460 + i * 80)}>
+              <GlassCard style={styles.settleRow}>
+                <View style={styles.settleLeft}>
+                  <Text style={styles.settleText}>
+                    <Text style={styles.settleName}>{s.fromName}</Text> owes{' '}
+                    <Text style={styles.settleName}>{s.toName}</Text>
+                  </Text>
+                  <Text style={styles.settleAmount}>${s.amount}</Text>
+                </View>
+                <Pressable
+                  onPress={() => toggleSettled(s)}
+                  style={({ pressed }) => [
+                    styles.settleButton,
+                    s.settled && styles.settleButtonDone,
+                    pressed && styles.primaryButtonPressed,
+                  ]}
+                >
+                  <Text style={[styles.settleButtonText, s.settled && styles.settleButtonTextDone]}>
+                    {s.settled ? 'Settled ✓' : 'Mark settled'}
+                  </Text>
+                </Pressable>
+              </GlassCard>
+            </Animated.View>
+          ))}
+        </Animated.View>
+      )}
 
       <Animated.View entering={FadeInDown.delay(560).springify().damping(18)} style={styles.actions}>
         <Pressable
@@ -199,6 +255,54 @@ const styles = StyleSheet.create({
   },
   payoutLoss: {
     color: '#FF5252',
+  },
+  settleHint: {
+    fontSize: 14,
+    color: FuturisticTheme.textSecondary,
+    marginBottom: 12,
+    marginTop: -4,
+  },
+  settleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  settleLeft: {
+    flex: 1,
+  },
+  settleText: {
+    fontSize: 15,
+    color: FuturisticTheme.textSecondary,
+  },
+  settleName: {
+    fontWeight: '700',
+    color: FuturisticTheme.textPrimary,
+  },
+  settleAmount: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: FuturisticTheme.accent,
+    marginTop: 2,
+  },
+  settleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: FuturisticTheme.accent,
+  },
+  settleButtonDone: {
+    borderColor: FuturisticTheme.accentTeal,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+  settleButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: FuturisticTheme.accent,
+  },
+  settleButtonTextDone: {
+    color: FuturisticTheme.accentTeal,
   },
   actions: {
     marginTop: 24,

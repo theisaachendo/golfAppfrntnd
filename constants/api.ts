@@ -12,3 +12,12 @@ export function apiUrl(path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`;
   return `${base}${p}`;
 }
+
+/**
+ * Real-money features (deposit/withdraw) are OFF by default.
+ * The app is a scorekeeper + settle-up tracker; friends settle off-app.
+ * Set EXPO_PUBLIC_MONEY_ENABLED=true (and the backend MONEY_ENABLED=true)
+ * once a payment processor is integrated.
+ */
+export const MONEY_ENABLED =
+  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_MONEY_ENABLED) === 'true';

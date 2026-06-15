@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
+import { MONEY_ENABLED } from '@/constants/api';
 import { clearToken } from '@/lib/auth-store';
 import { getMe } from '@/lib/users-api';
 
@@ -43,59 +44,72 @@ export default function ProfileScreen() {
   return (
     <FuturisticScreen title="Profile">
       <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
-        <Text style={styles.label}>BALANCE</Text>
-        <Text style={styles.hint}>Keep funds in app or request a withdrawal.</Text>
+        <Text style={styles.label}>STANDINGS</Text>
+        <Text style={styles.hint}>Your net across all games. Settle up with friends after each round.</Text>
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
         <GlassCard style={styles.balanceCard}>
           <SymbolView
-            name={{ ios: 'dollarsign.circle.fill', android: 'attach_money', web: 'attach_money' }}
+            name={{ ios: 'chart.line.uptrend.xyaxis', android: 'trending_up', web: 'trending_up' }}
             size={36}
             tintColor={FuturisticTheme.accent}
           />
           <View style={styles.balanceText}>
-            <Text style={styles.balanceLabel}>Available balance</Text>
-            <Text style={styles.balanceValue}>
-              {loading ? '—' : `$${(balance ?? 0).toFixed(2)}`}
+            <Text style={styles.balanceLabel}>Net standings</Text>
+            <Text
+              style={[
+                styles.balanceValue,
+                !loading && (balance ?? 0) < 0 && styles.balanceNegative,
+              ]}
+            >
+              {loading
+                ? '—'
+                : `${(balance ?? 0) >= 0 ? '+' : '−'}$${Math.abs(balance ?? 0).toFixed(2)}`}
             </Text>
           </View>
         </GlassCard>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
-        <Text style={styles.sectionTitle}>Funds</Text>
-        <GlassCard style={styles.optionsCard}>
-          <Pressable
-            style={({ pressed }) => [styles.optionRow, pressed && styles.optionRowPressed]}
-          >
-            <SymbolView
-              name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }}
-              size={24}
-              tintColor={FuturisticTheme.accent}
-            />
-            <View style={styles.optionText}>
-              <Text style={styles.optionLabel}>Keep in app</Text>
-              <Text style={styles.optionDesc}>Use balance for future games</Text>
+      {MONEY_ENABLED ? (
+        <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+          <Text style={styles.sectionTitle}>Funds</Text>
+          <GlassCard style={styles.optionsCard}>
+            <Pressable
+              onPress={() => router.push('/withdraw' as import('expo-router').Href)}
+              style={({ pressed }) => [styles.optionRow, pressed && styles.optionRowPressed]}
+            >
+              <SymbolView
+                name={{ ios: 'arrow.down.circle.fill', android: 'arrow_downward', web: 'arrow_downward' }}
+                size={24}
+                tintColor={FuturisticTheme.accentTeal}
+              />
+              <View style={styles.optionText}>
+                <Text style={styles.optionLabel}>Request withdrawal</Text>
+                <Text style={styles.optionDesc}>Send to your linked account</Text>
+              </View>
+            </Pressable>
+          </GlassCard>
+        </Animated.View>
+      ) : (
+        <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+          <GlassCard style={styles.optionsCard}>
+            <View style={styles.optionRow}>
+              <SymbolView
+                name={{ ios: 'person.2.fill', android: 'group', web: 'group' }}
+                size={24}
+                tintColor={FuturisticTheme.accent}
+              />
+              <View style={styles.optionText}>
+                <Text style={styles.optionLabel}>Settle up with friends</Text>
+                <Text style={styles.optionDesc}>
+                  After each game, open the results to see who owes whom. Pay each other directly.
+                </Text>
+              </View>
             </View>
-          </Pressable>
-          <View style={styles.optionDivider} />
-          <Pressable
-            onPress={() => router.push('/withdraw' as import('expo-router').Href)}
-            style={({ pressed }) => [styles.optionRow, pressed && styles.optionRowPressed]}
-          >
-            <SymbolView
-              name={{ ios: 'arrow.down.circle.fill', android: 'arrow_downward', web: 'arrow_downward' }}
-              size={24}
-              tintColor={FuturisticTheme.accentTeal}
-            />
-            <View style={styles.optionText}>
-              <Text style={styles.optionLabel}>Request withdrawal</Text>
-              <Text style={styles.optionDesc}>Send to your linked account</Text>
-            </View>
-          </Pressable>
-        </GlassCard>
-      </Animated.View>
+          </GlassCard>
+        </Animated.View>
+      )}
 
       <Animated.View entering={FadeInDown.delay(340).springify().damping(18)}>
         <Text style={styles.sectionTitle}>History</Text>
@@ -178,6 +192,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: FuturisticTheme.textPrimary,
     marginTop: 2,
+  },
+  balanceNegative: {
+    color: '#FF5252',
   },
   sectionTitle: {
     fontSize: 15,
