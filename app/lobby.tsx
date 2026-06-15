@@ -9,6 +9,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { FuturisticTheme } from '@/constants/Colors';
 import { ApiError } from '@/lib/api';
 import { getGame, startGame, type Game } from '@/lib/games-api';
+import { usePolling } from '@/lib/use-poll';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
@@ -31,26 +32,37 @@ export default function LobbyScreen() {
     setTimeout(() => setCopied(false), 2000);
   }, [game?.code]);
 
-  const loadGame = useCallback(async () => {
-    if (!gameId) {
-      setError('No game ID');
-      setLoading(false);
-      return;
-    }
-    try {
-      const g = await getGame(gameId);
-      setGame(g);
-      setError(null);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Failed to load game');
-    } finally {
-      setLoading(false);
-    }
-  }, [gameId]);
+  const loadGame = useCallback(
+    async (isPoll = false) => {
+      if (!gameId) {
+        setError('No game ID');
+        setLoading(false);
+        return;
+      }
+      try {
+        const g = await getGame(gameId);
+        setGame(g);
+        setError(null);
+        // Anyone in the lobby auto-advances when the host starts the game.
+        if (g.status === 'in_progress') {
+          router.replace(`/match/${gameId}`);
+        }
+      } catch (e) {
+        // Don't surface transient errors during background polling.
+        if (!isPoll) setError(e instanceof ApiError ? e.message : 'Failed to load game');
+      } finally {
+        if (!isPoll) setLoading(false);
+      }
+    },
+    [gameId, router]
+  );
 
   useEffect(() => {
     loadGame();
   }, [loadGame]);
+
+  // Live updates: refresh the player list / game status every 2.5s.
+  usePolling(() => loadGame(true), 2500);
 
   const handleStartGame = async () => {
     if (!gameId || !game) return;

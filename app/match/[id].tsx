@@ -13,6 +13,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FuturisticTheme } from '@/constants/Colors';
 import { ApiError } from '@/lib/api';
 import { endGame, getGame, recordHoleWinner, type Game } from '@/lib/games-api';
+import { usePolling } from '@/lib/use-poll';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
@@ -26,22 +27,32 @@ export default function ActiveMatchScreen() {
   const [error, setError] = useState<string | null>(null);
   const [pickerHole, setPickerHole] = useState<number | null>(null);
 
-  const loadGame = useCallback(async () => {
-    if (!id) return;
-    try {
-      const g = await getGame(id);
-      setGame(g);
-      setError(null);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Failed to load match');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
+  const loadGame = useCallback(
+    async (isPoll = false) => {
+      if (!id) return;
+      try {
+        const g = await getGame(id);
+        setGame(g);
+        setError(null);
+        // If another player ended the game, everyone moves to results.
+        if (g.status === 'completed') {
+          router.replace(`/result/${id}`);
+        }
+      } catch (e) {
+        if (!isPoll) setError(e instanceof ApiError ? e.message : 'Failed to load match');
+      } finally {
+        if (!isPoll) setLoading(false);
+      }
+    },
+    [id, router]
+  );
 
   useEffect(() => {
     loadGame();
   }, [loadGame]);
+
+  // Live updates: sync hole winners / leaderboard across all players every 2.5s.
+  usePolling(() => loadGame(true), 2500);
 
   const handleRecordWinner = async (holeNumber: number, winnerId: string) => {
     if (!id) return;
