@@ -1,14 +1,14 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { FuturisticTheme } from '@/constants/Colors';
 import { MONEY_ENABLED } from '@/constants/api';
 import { ApiError } from '@/lib/api';
 import { clearToken } from '@/lib/auth-store';
-import { getMe, updateDisplayName } from '@/lib/users-api';
+import { deleteAccount, getMe, updateDisplayName } from '@/lib/users-api';
 
 import { FuturisticScreen } from '@/components/FuturisticScreen';
 import { GlassCard } from '@/components/GlassCard';
@@ -71,6 +71,29 @@ export default function ProfileScreen() {
   const handleSignOut = async () => {
     await clearToken();
     router.replace('/login');
+  };
+
+  const confirmDelete = () => {
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your account and personal data. Past games stay visible to other players. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteAccount();
+            } catch {
+              // even if it fails server-side, sign the user out locally
+            }
+            await clearToken();
+            router.replace('/login');
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -212,6 +235,9 @@ export default function ProfileScreen() {
         <Pressable onPress={handleSignOut} style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
           <Text style={styles.signOutText}>Sign out</Text>
         </Pressable>
+        <Pressable onPress={confirmDelete} style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
+          <Text style={styles.deleteText}>Delete account</Text>
+        </Pressable>
       </Animated.View>
 
       {/* Edit name modal */}
@@ -343,6 +369,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: FuturisticTheme.textMuted,
+  },
+  deleteText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FF5C5C',
   },
   modalOverlay: {
     flex: 1,
