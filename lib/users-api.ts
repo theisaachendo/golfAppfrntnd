@@ -19,6 +19,10 @@ export async function updateDisplayName(displayName: string): Promise<User> {
   });
 }
 
+export async function deleteAccount(): Promise<{ success: true }> {
+  return apiRequest<{ success: true }>('/api/users/me', { method: 'DELETE' });
+}
+
 export async function getBalance(): Promise<{ balance: number }> {
   return apiRequest<{ balance: number }>('/api/users/me/balance');
 }
