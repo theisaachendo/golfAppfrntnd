@@ -101,12 +101,12 @@ export default function LobbyScreen() {
 
   return (
     <FuturisticScreen title="Lobby" showBack>
-      <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(40).duration(200)}>
         <Text style={styles.label}>WAITING FOR PLAYERS</Text>
         <Text style={styles.hint}>Share the game code so others can join.</Text>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(70).duration(200)}>
         <GlassCard style={styles.codeCard}>
           <Text style={styles.codeLabel}>Game code</Text>
           <View style={styles.codeRow}>
@@ -140,7 +140,7 @@ export default function LobbyScreen() {
         </GlassCard>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(110).duration(200)}>
         <Text style={styles.sectionTitle}>Players ({players.length})</Text>
         {players.length === 0 ? (
           <Text style={styles.emptyText}>No players yet.</Text>
@@ -162,7 +162,7 @@ export default function LobbyScreen() {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <Animated.View entering={FadeInDown.delay(520).springify().damping(18)} style={styles.actions}>
+      <Animated.View entering={FadeInDown.delay(200).duration(200)} style={styles.actions}>
         <Pressable
           onPress={handleStartGame}
           disabled={!canStart || starting}

@@ -76,7 +76,7 @@ export default function ResetPasswordScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(18)} style={styles.content}>
+        <Animated.View entering={FadeInDown.delay(40).duration(200)} style={styles.content}>
           <Text style={styles.label}>GOLF SKINS</Text>
           <Text style={styles.logo}>Reset password</Text>
           <Text style={styles.subtitle}>
@@ -85,7 +85,7 @@ export default function ResetPasswordScreen() {
 
           {!done ? (
             <>
-              <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+              <Animated.View entering={FadeInDown.delay(70).duration(200)}>
                 <GlassCard style={styles.inputCard}>
                   <TextInput
                     style={styles.input}
@@ -100,7 +100,7 @@ export default function ResetPasswordScreen() {
                 </GlassCard>
               </Animated.View>
 
-              <Animated.View entering={FadeInDown.delay(240).springify().damping(18)}>
+              <Animated.View entering={FadeInDown.delay(100).duration(200)}>
                 <GlassCard style={styles.inputCard}>
                   <TextInput
                     style={styles.input}
@@ -116,18 +116,18 @@ export default function ResetPasswordScreen() {
               </Animated.View>
 
               {validationError ? (
-                <Animated.View entering={FadeInDown.delay(260)}>
+                <Animated.View entering={FadeInDown.delay(110)}>
                   <Text style={styles.hintText}>{validationError}</Text>
                 </Animated.View>
               ) : null}
 
               {error ? (
-                <Animated.View entering={FadeInDown.delay(280)}>
+                <Animated.View entering={FadeInDown.delay(130)}>
                   <Text style={styles.errorText}>{error}</Text>
                 </Animated.View>
               ) : null}
 
-              <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
+              <Animated.View entering={FadeInDown.delay(130).duration(200)}>
                 <Pressable
                   onPress={handleReset}
                   disabled={loading || !token}
@@ -145,7 +145,7 @@ export default function ResetPasswordScreen() {
                 </Pressable>
               </Animated.View>
 
-              <Animated.View entering={FadeInDown.delay(380).springify().damping(18)}>
+              <Animated.View entering={FadeInDown.delay(150).duration(200)}>
                 <Pressable
                   onPress={() => router.replace('/login')}
                   style={({ pressed }) => [styles.linkWrap, pressed && styles.linkPressed]}
@@ -156,11 +156,11 @@ export default function ResetPasswordScreen() {
             </>
           ) : (
             <>
-              <Animated.View entering={FadeInDown.delay(180)}>
+              <Animated.View entering={FadeInDown.delay(70)}>
                 <Text style={styles.messageText}>Password updated. You can sign in now.</Text>
               </Animated.View>
 
-              <Animated.View entering={FadeInDown.delay(240).springify().damping(18)}>
+              <Animated.View entering={FadeInDown.delay(100).duration(200)}>
                 <Pressable
                   onPress={() => router.replace('/login')}
                   style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}

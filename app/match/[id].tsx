@@ -160,20 +160,20 @@ export default function ActiveMatchScreen() {
 
   return (
     <FuturisticScreen title="Active match" showBack scroll>
-      <Animated.View entering={FadeInDown.delay(80).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(30).duration(200)}>
         <Text style={styles.label}>HOLE {Math.min(currentHole, holeCount)} OF {holeCount}</Text>
         <Text style={styles.hint}>Tap a hole to set the winner, or mark it a tie to carry the skin over.</Text>
       </Animated.View>
 
       {notice ? (
-        <Animated.View entering={FadeInDown.springify().damping(18)}>
+        <Animated.View entering={FadeInDown.duration(200)}>
           <GlassCard style={styles.noticeCard}>
             <Text style={styles.noticeText}>{notice}</Text>
           </GlassCard>
         </Animated.View>
       ) : null}
 
-      <Animated.View entering={FadeInDown.delay(140).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(140).duration(200)}>
         <GlassCard style={styles.section}>
           <Text style={styles.sectionTitle}>Leaderboard</Text>
           {leaderboard.length === 0 ? (
@@ -195,7 +195,7 @@ export default function ActiveMatchScreen() {
         </GlassCard>
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(200).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(80).duration(200)}>
         <Text style={styles.sectionTitle}>HOLES</Text>
         {holes.map((h) => {
           const m = meta[h.holeNumber] || {};
@@ -258,7 +258,7 @@ export default function ActiveMatchScreen() {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <Animated.View entering={FadeInDown.delay(260).springify().damping(18)} style={styles.actions}>
+      <Animated.View entering={FadeInDown.delay(110).duration(200)} style={styles.actions}>
         <Pressable
           onPress={handleEndGame}
           disabled={ending}

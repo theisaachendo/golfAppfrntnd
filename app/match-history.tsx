@@ -53,7 +53,7 @@ export default function MatchHistoryScreen() {
 
   return (
     <FuturisticScreen title="Match history" showBack>
-      <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(40).duration(200)}>
         <Text style={styles.label}>PAST GAMES</Text>
         <Text style={styles.hint}>Tap a match to view full results.</Text>
       </Animated.View>

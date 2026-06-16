@@ -87,13 +87,13 @@ export default function PostMatchScreen() {
 
   return (
     <FuturisticScreen title="Match results" showBack>
-      <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(40).duration(200)}>
         <Text style={styles.label}>GAME COMPLETE</Text>
         <Text style={styles.hint}>Skins, standings, and who owes whom below.</Text>
       </Animated.View>
 
       {winner && (
-        <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(70).duration(200)}>
           <GlassCard style={styles.winnerCard}>
             <SymbolView
               name={{ ios: 'trophy.fill', android: 'emoji_events', web: 'emoji_events' }}
@@ -109,7 +109,7 @@ export default function PostMatchScreen() {
         </Animated.View>
       )}
 
-      <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(110).duration(200)}>
         <Text style={styles.sectionTitle}>Final standings</Text>
         {results.length === 0 ? (
           <Text style={styles.emptyText}>No results.</Text>
@@ -132,7 +132,7 @@ export default function PostMatchScreen() {
       </Animated.View>
 
       {settlements.length > 0 && (
-        <Animated.View entering={FadeInDown.delay(420).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(160).duration(200)}>
           <Text style={styles.sectionTitle}>Settle up</Text>
           <Text style={styles.settleHint}>
             Pay each other directly (Venmo, cash, etc.), then tap to mark it done.
@@ -165,7 +165,7 @@ export default function PostMatchScreen() {
         </Animated.View>
       )}
 
-      <Animated.View entering={FadeInDown.delay(560).springify().damping(18)} style={styles.actions}>
+      <Animated.View entering={FadeInDown.delay(210).duration(200)} style={styles.actions}>
         <Pressable
           onPress={handleDone}
           style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}

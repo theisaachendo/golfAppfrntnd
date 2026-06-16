@@ -55,12 +55,12 @@ export default function ForgotPasswordScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(18)} style={styles.content}>
+        <Animated.View entering={FadeInDown.delay(40).duration(200)} style={styles.content}>
           <Text style={styles.label}>GOLF SKINS</Text>
           <Text style={styles.logo}>Forgot password</Text>
           <Text style={styles.subtitle}>We’ll email you a reset link.</Text>
 
-          <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(70).duration(200)}>
             <GlassCard style={styles.inputCard}>
               <TextInput
                 style={styles.input}
@@ -83,13 +83,13 @@ export default function ForgotPasswordScreen() {
           ) : null}
 
           {message ? (
-            <Animated.View entering={FadeInDown.delay(240)}>
+            <Animated.View entering={FadeInDown.delay(100)}>
               <Text style={styles.messageText}>{message}</Text>
             </Animated.View>
           ) : null}
 
           {!sent ? (
-            <Animated.View entering={FadeInDown.delay(300).springify().damping(18)}>
+            <Animated.View entering={FadeInDown.delay(120).duration(200)}>
               <Pressable
                 onPress={handleSubmit}
                 disabled={loading}
@@ -107,7 +107,7 @@ export default function ForgotPasswordScreen() {
               </Pressable>
             </Animated.View>
           ) : (
-            <Animated.View entering={FadeInDown.delay(300).springify().damping(18)}>
+            <Animated.View entering={FadeInDown.delay(120).duration(200)}>
               <Pressable
                 onPress={() => router.replace('/login')}
                 style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
@@ -117,7 +117,7 @@ export default function ForgotPasswordScreen() {
             </Animated.View>
           )}
 
-          <Animated.View entering={FadeInDown.delay(380).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(150).duration(200)}>
             <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.linkWrap, pressed && styles.linkPressed]}>
               <Text style={styles.linkText}>Cancel</Text>
             </Pressable>

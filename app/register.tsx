@@ -59,12 +59,12 @@ export default function RegisterScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(18)} style={styles.content}>
+        <Animated.View entering={FadeInDown.delay(40).duration(200)} style={styles.content}>
           <Text style={styles.label}>GOLF SKINS</Text>
           <Text style={styles.logo}>Create account</Text>
           <Text style={styles.subtitle}>Sign up to start tracking skins.</Text>
 
-          <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(70).duration(200)}>
             <GlassCard style={styles.inputCard}>
               <TextInput
                 style={styles.input}
@@ -78,7 +78,7 @@ export default function RegisterScreen() {
             </GlassCard>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(240).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(100).duration(200)}>
             <GlassCard style={styles.inputCard}>
               <TextInput
                 style={styles.input}
@@ -93,7 +93,7 @@ export default function RegisterScreen() {
             </GlassCard>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(300).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(120).duration(200)}>
             <GlassCard style={styles.inputCard}>
               <TextInput
                 style={styles.input}
@@ -108,18 +108,18 @@ export default function RegisterScreen() {
           </Animated.View>
 
           {passwordHint ? (
-            <Animated.View entering={FadeInDown.delay(320)}>
+            <Animated.View entering={FadeInDown.delay(130)}>
               <Text style={styles.hintText}>{passwordHint}</Text>
             </Animated.View>
           ) : null}
 
           {error ? (
-            <Animated.View entering={FadeInDown.delay(340)}>
+            <Animated.View entering={FadeInDown.delay(140)}>
               <Text style={styles.errorText}>{error}</Text>
             </Animated.View>
           ) : null}
 
-          <Animated.View entering={FadeInDown.delay(380).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(150).duration(200)}>
             <Pressable
               onPress={handleRegister}
               disabled={loading}
@@ -133,7 +133,7 @@ export default function RegisterScreen() {
             </Pressable>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(440).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(170).duration(200)}>
             <Pressable onPress={() => router.replace('/login')} style={({ pressed }) => [styles.linkWrap, pressed && styles.linkPressed]}>
               <Text style={styles.linkText}>Already have an account? Sign in</Text>
             </Pressable>

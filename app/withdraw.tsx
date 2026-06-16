@@ -48,12 +48,12 @@ export default function WithdrawScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboard}
       >
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(40).duration(200)}>
           <Text style={styles.label}>AMOUNT</Text>
           <Text style={styles.hint}>Enter the amount to withdraw.</Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(70).duration(200)}>
           <GlassCard style={styles.card}>
             <Text style={styles.fieldLabel}>Amount ($)</Text>
             <TextInput
@@ -68,12 +68,12 @@ export default function WithdrawScreen() {
         </Animated.View>
 
         {error ? (
-          <Animated.View entering={FadeInDown.delay(100)}>
+          <Animated.View entering={FadeInDown.delay(40)}>
             <Text style={styles.errorText}>{error}</Text>
           </Animated.View>
         ) : null}
 
-        <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(110).duration(200)}>
           <Pressable
             onPress={handleWithdraw}
             disabled={loading}

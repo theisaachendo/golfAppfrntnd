@@ -76,7 +76,7 @@ export default function ProfileScreen() {
   return (
     <FuturisticScreen title="Profile">
       {/* Identity */}
-      <Animated.View entering={FadeInDown.delay(80).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(30).duration(200)}>
         <GlassCard style={styles.identityCard}>
           <View style={styles.avatar}>
             <SymbolView
@@ -104,7 +104,7 @@ export default function ProfileScreen() {
       </Animated.View>
 
       {/* Standings */}
-      <Animated.View entering={FadeInDown.delay(140).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(140).duration(200)}>
         <Text style={styles.sectionTitle}>STANDINGS</Text>
         <GlassCard style={styles.balanceCard}>
           <SymbolView
@@ -122,7 +122,7 @@ export default function ProfileScreen() {
       </Animated.View>
 
       {MONEY_ENABLED ? (
-        <Animated.View entering={FadeInDown.delay(200).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(80).duration(200)}>
           <GlassCard style={styles.infoCard}>
             <Pressable
               onPress={() => router.push('/withdraw' as import('expo-router').Href)}
@@ -141,7 +141,7 @@ export default function ProfileScreen() {
           </GlassCard>
         </Animated.View>
       ) : (
-        <Animated.View entering={FadeInDown.delay(200).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(80).duration(200)}>
           <GlassCard style={styles.infoCard}>
             <View style={styles.optionRow}>
               <SymbolView
@@ -161,7 +161,7 @@ export default function ProfileScreen() {
       )}
 
       {/* History (signed-up) or upsell (guest) */}
-      <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+      <Animated.View entering={FadeInDown.delay(110).duration(200)}>
         <Text style={styles.sectionTitle}>HISTORY</Text>
         {isGuest ? (
           <Pressable onPress={() => router.push('/register')} style={({ pressed }) => [pressed && styles.pressed]}>
@@ -208,7 +208,7 @@ export default function ProfileScreen() {
         )}
       </Animated.View>
 
-      <Animated.View entering={FadeInDown.delay(340).springify().damping(18)} style={styles.signOutSection}>
+      <Animated.View entering={FadeInDown.delay(140).duration(200)} style={styles.signOutSection}>
         <Pressable onPress={handleSignOut} style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}>
           <Text style={styles.signOutText}>Sign out</Text>
         </Pressable>

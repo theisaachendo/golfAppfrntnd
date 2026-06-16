@@ -66,12 +66,12 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(18)} style={styles.content}>
+        <Animated.View entering={FadeInDown.delay(40).duration(200)} style={styles.content}>
           <Text style={styles.label}>GOLF SKINS</Text>
           <Text style={styles.logo}>Sign in</Text>
           <Text style={styles.subtitle}>Manage your games and track every skin.</Text>
 
-          <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(70).duration(200)}>
             <GlassCard style={styles.inputCard}>
               <TextInput
                 style={styles.input}
@@ -86,7 +86,7 @@ export default function LoginScreen() {
             </GlassCard>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(240).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(100).duration(200)}>
             <GlassCard style={styles.inputCard}>
               <TextInput
                 style={styles.input}
@@ -101,12 +101,12 @@ export default function LoginScreen() {
           </Animated.View>
 
           {error ? (
-            <Animated.View entering={FadeInDown.delay(100)}>
+            <Animated.View entering={FadeInDown.delay(40)}>
               <Text style={styles.errorText}>{error}</Text>
             </Animated.View>
           ) : null}
 
-          <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(130).duration(200)}>
             <Pressable
               onPress={handleLogin}
               disabled={loading}
@@ -120,7 +120,7 @@ export default function LoginScreen() {
             </Pressable>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(400).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(160).duration(200)}>
             <Pressable
               onPress={() => {
                 setError(null);
@@ -133,7 +133,7 @@ export default function LoginScreen() {
             </Pressable>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(460).springify().damping(18)} style={styles.linkRow}>
+          <Animated.View entering={FadeInDown.delay(180).duration(200)} style={styles.linkRow}>
             <Pressable
               onPress={() => router.push('/forgot-password')}
               disabled={loading}

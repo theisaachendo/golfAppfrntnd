@@ -73,7 +73,7 @@ export default function HomeScreen() {
           </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(200).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(80).duration(200)}>
           <GlassCard style={styles.strip}>
             <Animated.View style={styles.stripContent}>
               <SymbolView
@@ -87,7 +87,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {hasActiveMatch ? (
-          <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
+          <Animated.View entering={FadeInDown.delay(130).duration(200)}>
             <GradientActionCard
               primary
               title="Resume match"
@@ -104,7 +104,7 @@ export default function HomeScreen() {
           </Animated.View>
         ) : (
           <>
-            <Animated.View entering={FadeInDown.delay(320).springify().damping(18)}>
+            <Animated.View entering={FadeInDown.delay(130).duration(200)}>
               <GradientActionCard
                 primary
                 title="New game"
@@ -120,7 +120,7 @@ export default function HomeScreen() {
               />
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(420).springify().damping(18)}>
+            <Animated.View entering={FadeInDown.delay(160).duration(200)}>
               <GradientActionCard
                 title="Join game"
                 subtitle="Enter a code and get in the game."
@@ -137,7 +137,7 @@ export default function HomeScreen() {
           </>
         )}
 
-        <Animated.View entering={FadeIn.delay(520)} style={styles.howSection}>
+        <Animated.View entering={FadeIn.delay(200)} style={styles.howSection}>
           <Text style={styles.sectionTitle}>How it works</Text>
           <View style={styles.steps}>
             <Step number="1" label="Create or join a game" />
@@ -152,7 +152,7 @@ export default function HomeScreen() {
 
 function Step({ number, label }: { number: string; label: string }) {
   return (
-    <Animated.View style={styles.step} entering={FadeIn.delay(600)}>
+    <Animated.View style={styles.step} entering={FadeIn.delay(230)}>
       <View style={styles.stepBadge}>
         <Text style={styles.stepNumber}>{number}</Text>
       </View>

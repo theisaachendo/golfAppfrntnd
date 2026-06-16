@@ -64,12 +64,12 @@ export default function CreateScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboard}
       >
-        <Animated.View entering={FadeInDown.delay(100).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(40).duration(200)}>
           <Text style={styles.label}>GAME DETAILS</Text>
           <Text style={styles.hint}>Set a name and skin value per hole.</Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(180).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(70).duration(200)}>
           <GlassCard style={styles.card}>
             <Text style={styles.fieldLabel}>Game name</Text>
             <TextInput
@@ -82,7 +82,7 @@ export default function CreateScreen() {
           </GlassCard>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(260).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(110).duration(200)}>
           <GlassCard style={styles.card}>
             <Text style={styles.fieldLabel}>Stake per hole ($)</Text>
             <TextInput
@@ -96,7 +96,7 @@ export default function CreateScreen() {
           </GlassCard>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(300).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(120).duration(200)}>
           <GlassCard style={styles.card}>
             <Text style={styles.fieldLabel}>Holes</Text>
             <View style={styles.segment}>
@@ -116,12 +116,12 @@ export default function CreateScreen() {
         </Animated.View>
 
         {error ? (
-          <Animated.View entering={FadeInDown.delay(100)}>
+          <Animated.View entering={FadeInDown.delay(40)}>
             <Text style={styles.errorText}>{error}</Text>
           </Animated.View>
         ) : null}
 
-        <Animated.View entering={FadeInDown.delay(340).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(140).duration(200)}>
           <Pressable
             onPress={handleCreate}
             disabled={loading}
